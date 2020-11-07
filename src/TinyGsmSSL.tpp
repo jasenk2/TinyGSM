@@ -41,14 +41,14 @@ class TinyGsmSSL {
   /*
    * Inner Secure Client
    */
-  /*
+
  public:
   class GsmClientSecure : public GsmClient {
    public:
-    GsmClientSecureSim800() {}
+    GsmClientSecure() {}
 
-    explicit GsmClientSecureSim800(TinyGsmSim800& modem, uint8_t mux = 0)
-        : GsmClientSim800(modem, mux) {}
+    explicit GsmClientSecure(TinyGsm& modem, uint8_t mux = 0)
+        : GsmClient(modem, mux) {}
 
    public:
     int connect(const char* host, uint16_t port, int timeout_s) overide {
@@ -58,14 +58,20 @@ class TinyGsmSSL {
       sock_connected = at->modemConnect(host, port, mux, true, timeout_s);
       return sock_connected;
     }
-  };*/
+  };
 
   /*
    * SSL functions
    */
  protected:
-  bool addCertificateImpl(const char* filename) TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  bool deleteCertificateImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
+  bool addCertificateImpl(const char* filename) {
+    return thisModem().addCertificateImpl(filename);
+  }
+  // TINY_GSM_ATTR_NOT_IMPLEMENTED;
+  bool deleteCertificateImpl() {
+    return thisModem().deleteCertificateImpl();
+  }
+  //TINY_GSM_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYGSMSSL_H_

@@ -118,7 +118,7 @@ class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
    * Inner Secure Client
    */
 
-  /*TODO(?))
+  //DO(?))
   class GsmClientSecureSIM7000 : public GsmClientSim7000
   {
   public:
@@ -138,7 +138,7 @@ class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
     }
     TINY_GSM_CLIENT_CONNECT_OVERRIDES
   };
-  */
+  
 
   /*
    * Constructor
