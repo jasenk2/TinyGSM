@@ -138,6 +138,16 @@ public:
       return sock_connected;
     }
     TINY_GSM_CLIENT_CONNECT_OVERRIDES
+    void stop(uint32_t maxWaitMs) {
+      dumpModemBuffer(maxWaitMs);
+      at->sendAT(GF("+CACLOSE="), mux);
+      sock_connected = false;
+      at->waitResponse();
+    }
+    void stop() override {
+      stop(15000L);
+    }
+    String remoteIP() TINY_GSM_ATTR_NOT_IMPLEMENTED;
   };
   
 
@@ -519,11 +529,27 @@ public:
    */
  protected:
    bool addCertificateImpl(const char * filename){
-     
-     return true;
+    String cert=filename; 
+    if (cert.length()>10239L) return false;
+    sendAT(GF("+CFSINIT"));
+    if (1!=waitResponse()) { return false; };
+    sendAT(GF("+CFSWFILE=2,\"mqttca.crt\",0,"),sizeof(cert),GF(",5000"));
+    if (1!=waitResponse(GF("DOWNLOAD"))) { return false; };
+    streamWrite(cert);
+    delay(150);
+    sendAT(GF("+CFSTERM"));
+    if (1!=waitResponse()) { return false; };
+    return true;
    }
-   bool deleteCertificateImpl(const char * filename){
-     return true; 
+
+   bool deleteCertificateImpl(){
+    sendAT(GF("+CFSINIT"));
+    if (1!=waitResponse()) { return false; };
+    sendAT(GF("+CFSDFILE,2,\"mqttca.crt\""));
+    if (1!=waitResponse()) { return false; };
+    sendAT(GF("+CFSTERM"));
+    if (1!=waitResponse()) { return false; };
+    return true; 
    }
   /*
    * Time functions
