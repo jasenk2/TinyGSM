@@ -20,6 +20,7 @@
 #include "TinyGsmGPS.tpp"
 #include "TinyGsmModem.tpp"
 #include "TinyGsmSMS.tpp"
+#include "TinyGsmSSL.tpp"
 #include "TinyGsmTCP.tpp"
 #include "TinyGsmTime.tpp"
 
@@ -44,6 +45,7 @@ enum RegStatus {
 class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
                        public TinyGsmGPRS<TinyGsmSim7000>,
                        public TinyGsmTCP<TinyGsmSim7000, TINY_GSM_MUX_COUNT>,
+                       public TinyGsmSSL<TinyGsmSim7000>,
                        public TinyGsmSMS<TinyGsmSim7000>,
                        public TinyGsmGPS<TinyGsmSim7000>,
                        public TinyGsmTime<TinyGsmSim7000>,
@@ -51,6 +53,7 @@ class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
   friend class TinyGsmModem<TinyGsmSim7000>;
   friend class TinyGsmGPRS<TinyGsmSim7000>;
   friend class TinyGsmTCP<TinyGsmSim7000, TINY_GSM_MUX_COUNT>;
+  friend class TinyGsmSSL<TinyGsmSim7000>;
   friend class TinyGsmSMS<TinyGsmSim7000>;
   friend class TinyGsmGPS<TinyGsmSim7000>;
   friend class TinyGsmTime<TinyGsmSim7000>;
@@ -117,16 +120,14 @@ class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
   /*
    * Inner Secure Client
    */
-
-  //DO(?))
-  class GsmClientSecureSIM7000 : public GsmClientSim7000
+public:
+  class GsmClientSecureSim7000 : public GsmClientSim7000
   {
   public:
-    GsmClientSecure() {}
+    GsmClientSecureSim7000() {}
 
-    GsmClientSecure(TinyGsmSim7000& modem, uint8_t mux = 0)
-     : public GsmClient(modem, mux)
-    {}
+    explicit GsmClientSecureSim7000(TinyGsmSim7000& modem, uint8_t mux = 0)
+     : GsmClientSim7000(modem, mux) {}
 
   public:
     int connect(const char* host, uint16_t port, int timeout_s) override {
@@ -513,7 +514,17 @@ class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
     waitResponse();
     return false;
   }
-
+  /*
+   * SSL certificate functuions
+   */
+ protected:
+   bool addCertificateImpl(const char * filename){
+     
+     return true;
+   }
+   bool deleteCertificateImpl(const char * filename){
+     return true; 
+   }
   /*
    * Time functions
    */
@@ -531,16 +542,31 @@ class TinyGsmSim7000 : public TinyGsmModem<TinyGsmSim7000>,
  protected:
   bool modemConnect(const char* host, uint16_t port, uint8_t mux,
                     bool ssl = false, int timeout_s = 75) {
-    if (ssl) { DBG("SSL not yet supported on this module!"); }
-
     uint32_t timeout_ms = ((uint32_t)timeout_s) * 1000;
-    sendAT(GF("+CIPSTART="), mux, ',', GF("\"TCP"), GF("\",\""), host,
+
+    if (ssl) { 
+           
+      DBG("SSL experimental!"); 
+      sendAT(GF("+CAID="), mux);
+      if (1!=waitResponse()) { return false; };
+      sendAT(GF("+CASSLCFG"),mux,GF(",\"cacert\",\"mqttca.crt\""));  //trust only our certs
+      if (1!=waitResponse()) { return false; };
+      sendAT(GF("+CAOPEN="), mux, GF(",\""), host, GF("\","), port);
+      return waitResponse(timeout_ms, GF("CONNECT OK" GSM_NL),
+                         GF("CONNECT FAIL" GSM_NL),
+                         GF("ALREADY CONNECT" GSM_NL), GF("ERROR" GSM_NL),
+                         GF("CLOSE OK" GSM_NL));
+    } else {
+      sendAT(GF("+CIPSTART="), mux, ',', GF("\"TCP"), GF("\",\""), host,
            GF("\","), port);
-    return (1 ==
+      return (1 ==
             waitResponse(timeout_ms, GF("CONNECT OK" GSM_NL),
                          GF("CONNECT FAIL" GSM_NL),
                          GF("ALREADY CONNECT" GSM_NL), GF("ERROR" GSM_NL),
                          GF("CLOSE OK" GSM_NL)));
+
+    }
+
   }
 
   int16_t modemSend(const void* buff, size_t len, uint8_t mux) {

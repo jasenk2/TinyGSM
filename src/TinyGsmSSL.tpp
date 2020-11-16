@@ -40,26 +40,22 @@ class TinyGsmSSL {
 
   /*
    * Inner Secure Client
-   */
-
- public:
+   
+public:
   class GsmClientSecure : public GsmClient {
    public:
-    GsmClientSecure() {}
-
-    explicit GsmClientSecure(TinyGsm& modem, uint8_t mux = 0)
-        : GsmClient(modem, mux) {}
-
+    GsmClientSecureSim7000() {}
+    explicit GsmClientSecureSim7000(TinyGsmSim800& modem, uint8_t mux = 0)
+        : GsmClientSim7000(modem, mux) {}
    public:
-    int connect(const char* host, uint16_t port, int timeout_s) overide {
+    int connect(const char* host, uint16_t port, int timeout_s) overide thisModem().connect(const char* host, uint16_t port, int timeout_s) {
       stop();
       TINY_GSM_YIELD();
       rx.clear();
       sock_connected = at->modemConnect(host, port, mux, true, timeout_s);
       return sock_connected;
     }
-  };
-
+  */
   /*
    * SSL functions
    */
