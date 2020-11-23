@@ -27,6 +27,7 @@ typedef TinyGsmSim800                  TinyGsm;
 typedef TinyGsmSim800::GsmClientSim800 TinyGsmClient;
 
 #elif defined(TINY_GSM_MODEM_SIM7000)
+#define TINY_GSM_MODEM_HAS_MQTT
 #include "TinyGsmClientSIM7000.h"
 typedef TinyGsmSim7000                   TinyGsm;
 typedef TinyGsmSim7000::GsmClientSim7000 TinyGsmClient;

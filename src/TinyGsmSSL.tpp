@@ -20,11 +20,24 @@ class TinyGsmSSL {
   /*
    * SSL functions
    */
-  bool addCertificate(const char* filename) {
+  bool addCACert(const char* ca){
+    return thisModem().addCACertImpl(ca);
+  }
+  bool addCertificate(const char* filename) {    
     return thisModem().addCertificateImpl(filename);
   }
   bool deleteCertificate() {
     return thisModem().deleteCertificateImpl();
+  }
+  bool addKey(const char* filename) {
+    return thisModem().addKeyImpl(filename);
+  }
+  bool deleteKey() {
+    return thisModem().deleteKeyImpl();
+  }
+  bool hasSSL()
+  {
+    return true;
   }
 
   /*
@@ -38,34 +51,25 @@ class TinyGsmSSL {
     return static_cast<modemType&>(*this);
   }
 
-  /*
-   * Inner Secure Client
-   
-public:
-  class GsmClientSecure : public GsmClient {
-   public:
-    GsmClientSecureSim7000() {}
-    explicit GsmClientSecureSim7000(TinyGsmSim800& modem, uint8_t mux = 0)
-        : GsmClientSim7000(modem, mux) {}
-   public:
-    int connect(const char* host, uint16_t port, int timeout_s) overide thisModem().connect(const char* host, uint16_t port, int timeout_s) {
-      stop();
-      TINY_GSM_YIELD();
-      rx.clear();
-      sock_connected = at->modemConnect(host, port, mux, true, timeout_s);
-      return sock_connected;
-    }
-  */
+
   /*
    * SSL functions
    */
  protected:
-  bool addCertificateImpl(const char* filename) {
+  bool addCACertImpl(const char* ca){
+    return thisModem().addCACertImpl(ca);
+  }
+    bool addCertificateImpl(const char* filename) {
     return thisModem().addCertificateImpl(filename);
   }
-  // TINY_GSM_ATTR_NOT_IMPLEMENTED;
+  bool addKeyImpl(const char* filename) {
+    return thisModem().addKeyImpl(filename);
+  }  // TINY_GSM_ATTR_NOT_IMPLEMENTED;
   bool deleteCertificateImpl() {
     return thisModem().deleteCertificateImpl();
+  }
+  bool deleteKeyImpl() {
+    return thisModem().deleteKeyImpl();
   }
   //TINY_GSM_ATTR_NOT_IMPLEMENTED;
 };

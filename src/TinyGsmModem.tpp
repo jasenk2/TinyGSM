@@ -122,8 +122,8 @@ class TinyGsmModem {
 
   String getModemInfoImpl() {
     thisModem().sendAT(GF("I"));
-    String res;
-    if (thisModem().waitResponse(1000L, res) != 1) { return ""; }
+    String res="";
+    if (thisModem().waitResponse(1000L, res) != 1) { return res; }
     // Do the replaces twice so we cover both \r and \r\n type endings
     res.replace("\r\nOK\r\n", "");
     res.replace("\rOK\r", "");
